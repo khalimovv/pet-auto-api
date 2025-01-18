@@ -114,7 +114,3 @@ class TestRegisterUser:
                                         f"Фактический статус код: {get_status_code}")
 
         assert get_response is not None, "Пустой ответ от сервера"
-
-
-
-
