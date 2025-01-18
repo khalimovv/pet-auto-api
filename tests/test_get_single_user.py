@@ -1,6 +1,7 @@
 import requests
 
 
+
 class TestGetSingleUser:
     def test_get_single_user(self):
         response = requests.get(url="https://reqres.in/api/users/2")
