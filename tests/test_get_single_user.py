@@ -1,8 +1,20 @@
 import requests
+import allure
 
+
+@allure.story("Проверка работоспособности API")
+@allure.label("owner", "A.Khalimov")
+@allure.title("Проверка CRUD операции на пользователе")
+@allure.description("""
+  В этом тесте проверяется работоспособность функциональности по CRUD-feature 
+  с использованием валидных данных в запросе.
+  Проверяется, что система корректно обрабатывает запрос и выводит соответствующую информацию в теле ответа
+  и в базе данных.
+""")
 
 
 class TestGetSingleUser:
+    @allure.title("Проверка существования юзера при отправке гет запроса")
     def test_get_single_user(self):
         response = requests.get(url="https://reqres.in/api/users/2")
         print(f"Роут: {response.url}")
@@ -21,6 +33,7 @@ class TestGetSingleUser:
 
 
 class TestSingleResource:
+    @allure.title("Проверка существования юзера при отправке гет запроса")
     def test_get_single_resource(self):
         send_single_resource_request = requests.get(url="https://reqres.in/api/unknown/2")
         print(f"Роут: {send_single_resource_request.url}")
@@ -39,6 +52,7 @@ class TestSingleResource:
         assert get_single_resource_json is not None, "Пустой ответ от сервера"
 
 class TestCreateUser:
+    @allure.title("Проверка создания юзера при отправке пост запроса")
     def test_create_user(self):
         send_create_request_user = requests.post(url='https://reqres.in/api/users',
                                                  json={
@@ -61,6 +75,7 @@ class TestCreateUser:
 
 
 class TestUpdateUser:
+    @allure.title("Проверка обновления данных юзера при отправке пут запроса")
     def test_update_user_info(self):
         update_user_request = requests.put(url='https://reqres.in/api/users/2',
                                            json={
@@ -83,6 +98,7 @@ class TestUpdateUser:
 
 
 class TestDeleteUserInfo:
+    @allure.title("Проверка удаления юзера при отправке делит запроса")
     def test_delete_user_info(self):
 
         delete_user_info_request = requests.delete(url="https://reqres.in/api/users/2")
@@ -97,6 +113,7 @@ class TestDeleteUserInfo:
 
 
 class TestRegisterUser:
+    @allure.title("Проверка регистрации юзера при отправке пост запроса")
     def test_register_user(self):
         register_user = requests.post(url="https://reqres.in/api/register", json={
             "email": "eve.holt@reqres.in",
