@@ -1,11 +1,34 @@
+# lib/http_methods.py
 import requests
+from config.config import BASE_URL
 
-class HttpMethods:
-    @staticmethod
-    def post(url: str, json: dict = None, headers: dict = None, files: dict = None):
-        return HttpMethods._send(url, json, headers, 'POST', files)
+class HttpClient:
+    BASE_URL = BASE_URL
 
-    @staticmethod
-    def get(url: str, data: dict = None, headers: dict = None,):
-        return HttpMethods._send(url, data, headers)
+    @classmethod
+    def get(cls, path: str, **kwargs):
+        """Отправка GET запроса по указанному пути"""
+        url = f"{cls.BASE_URL}{path}"
+        response = requests.get(url, **kwargs)
+        return response
 
+    @classmethod
+    def post(cls, path: str, **kwargs):
+        """Отправка POST запроса по указанному пути"""
+        url = f"{cls.BASE_URL}{path}"
+        response = requests.post(url, **kwargs)
+        return response
+
+    @classmethod
+    def put(cls, path: str, **kwargs):
+        """Отправка PUT запроса по указанному пути"""
+        url = f"{cls.BASE_URL}{path}"
+        response = requests.put(url, **kwargs)
+        return response
+
+    @classmethod
+    def delete(cls, path: str, **kwargs):
+        """Отправка DELETE запроса по указанному пути"""
+        url = f"{cls.BASE_URL}{path}"
+        response = requests.delete(url, **kwargs)
+        return response
