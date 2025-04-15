@@ -1,6 +1,9 @@
 from lib.http_methods import HttpClient
 import allure
 
+from lib.logger import Logger
+
+
 class TestDeleteUserInfo:
     @allure.title("Проверка удаления юзера при отправке делит запроса")
     def test_delete_user_info(self):
@@ -9,6 +12,9 @@ class TestDeleteUserInfo:
 
         get_status_code = delete_user_info_request.status_code
         print(f"Статус код от сервера: {get_status_code}")
+
+        Logger.log_response(delete_user_info_request)
+
 
         assert get_status_code == 204, (
             f"Ожидаемый статус код: 204. Фактический статус код: {get_status_code}"

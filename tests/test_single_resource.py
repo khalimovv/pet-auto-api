@@ -1,6 +1,9 @@
 from lib.http_methods import HttpClient
 import allure
 
+from lib.logger import Logger
+
+
 class TestSingleResource:
     @allure.title("Проверка существования ресурса при отправке гет запроса")
     def test_get_single_resource(self):
@@ -12,6 +15,9 @@ class TestSingleResource:
 
         get_response_status_code = send_single_resource_request.status_code
         print(f"Статус код от сервера: {get_response_status_code}")
+
+        Logger.log_response(send_single_resource_request)
+
 
         assert get_response_status_code == 200, (
             f"Ожидаемый статус код: 200. Фактический статус код: {get_response_status_code}"

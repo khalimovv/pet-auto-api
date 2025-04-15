@@ -1,5 +1,7 @@
 import allure
 from lib.http_methods import HttpClient
+from lib.logger import Logger
+
 
 @allure.story("Проверка работоспособности API")
 @allure.label("owner", "A.Khalimov")
@@ -18,6 +20,9 @@ class TestGetSingleUser:
 
         get_response = response.json()
         print(f"Тело ответа: {get_response}")
+
+        Logger.log_response(response)
+
 
         get_response_status_code = response.status_code
         print(f"Статус код от сервера: {get_response_status_code}")

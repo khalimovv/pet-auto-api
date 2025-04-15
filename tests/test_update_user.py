@@ -1,6 +1,9 @@
 from lib.http_methods import HttpClient
 import allure
 
+from lib.logger import Logger
+
+
 class TestUpdateUser:
     @allure.title("Проверка обновления данных юзера при отправке пут запроса")
     def test_update_user_info(self):
@@ -17,6 +20,9 @@ class TestUpdateUser:
 
         get_status_code = update_user_request.status_code
         print(f"Статус код от сервера: {get_status_code}")
+
+        Logger.log_response(update_user_request)
+
 
         assert get_status_code == 200, (
             f"Ожидаемый статус код: 200. Фактический статус код: {get_status_code}"

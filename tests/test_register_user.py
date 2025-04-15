@@ -1,6 +1,9 @@
 from lib.http_methods import HttpClient
 import allure
 
+from lib.logger import Logger
+
+
 class TestRegisterUser:
     @allure.title("Проверка регистрации юзера при отправке пост запроса")
     def test_register_user(self):
@@ -17,6 +20,9 @@ class TestRegisterUser:
 
         get_status_code = register_user.status_code
         print(f"Статус код от сервера: {get_status_code}")
+
+        Logger.log_response(register_user)
+
 
         assert get_status_code == 200, (
             f"Ожидаемый статус код: 200. Фактический статус код: {get_status_code}"
