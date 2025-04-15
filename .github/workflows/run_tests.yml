@@ -41,7 +41,7 @@ jobs:
       - run: mkdir allure-results && unzip artifacts.zip -d allure-results
 
       - name: Store allure history
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: allure-results
 
@@ -65,7 +65,7 @@ jobs:
         if: "github.event.inputs.deployment_target == 'second_test'"
         run: pytest tests/test_get_single_user.py::TestGetSingleUser::test_get_single_user --alluredir=allure-results
       - name: Store allure results
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: allure-results
           path:
@@ -86,7 +86,7 @@ jobs:
         uses: actions/download-artifact@v3
       - run: allure generate -c allure-results -o _site
       - name: Store generated report
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v2
         with:
           name: _site
           path:
