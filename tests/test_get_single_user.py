@@ -2,7 +2,7 @@ import allure
 from lib.http_methods import HttpClient
 from lib.logger import Logger
 
-
+@allure.suite("User API")
 @allure.story("Проверка работоспособности API")
 @allure.label("owner", "A.Khalimov")
 @allure.title("Проверка CRUD операции на пользователе")
