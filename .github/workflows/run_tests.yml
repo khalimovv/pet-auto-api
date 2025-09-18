@@ -45,8 +45,10 @@ jobs:
         with:
           name: allure-results
 
+
   test:
     runs-on: ubuntu-latest
+
     steps:
       - name: Checkout repository
         uses: actions/checkout@v3
@@ -66,7 +68,8 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: allure-results
-          path: allure-results
+          path:
+            allure-results
           retention-days: 1
 
   generate-report:
@@ -78,10 +81,7 @@ jobs:
         with:
           distribution: 'microsoft'
           java-version: '17'
-      - run: |
-          sudo wget https://github.com/allure-framework/allure2/releases/download/2.32.0/allure-2.32.0.tgz && \
-          sudo tar -zxvf allure-2.32.0.tgz -C /opt/ && \
-          sudo ln -s /opt/allure-2.32.0/bin/allure /usr/bin/allure
+      - run: sudo wget https://github.com/allure-framework/allure2/releases/download/2.32.0/allure-2.32.0.tgz && sudo tar -zxvf allure-2.32.0.tgz -C /opt/ && sudo ln -s /opt/allure-2.32.0/bin/allure /usr/bin/allure
       - name: Download all workflow artifacts
         uses: actions/download-artifact@v3
       - run: allure generate -c allure-results -o _site
@@ -89,10 +89,13 @@ jobs:
         uses: actions/upload-artifact@v3
         with:
           name: _site
-          path: _site
+          path:
+            _site
           retention-days: 1
 
+
   publist-report:
+
     runs-on: ubuntu-latest
     needs: generate-report
     name: Report publication
