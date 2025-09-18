@@ -1,66 +1,109 @@
-  generate-report:
-    name: Generate Allure report
+name: Automated tests
+
+on:
+  workflow_dispatch:
+    inputs:
+      deployment_target:
+        description: Choose target
+        required: true
+        default:
+        type: choice
+        options:
+          - first_test
+          - second_test
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+jobs:
+  download-history:
     runs-on: ubuntu-latest
-    needs: test
-
+    name: Download history
     steps:
-      - name: Setup Java (required by Allure)
-        uses: actions/setup-java@v4
+      - name: Setup Python
+        uses: actions/setup-python@v4
         with:
-          distribution: 'temurin'
-          java-version: '17'
+          python-version: "3.13"
+      - run: |
+          ARTIFACT_ID=$(curl -L \
+              -H "Accept: application/vnd.github+json" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              "https://api.github.com/repos/khalimovv/pet-auto-api/actions/artifacts?name=allure-results" | \
+              python3 -c "import sys, json; print(json.load(sys.stdin)['artifacts'][0]['id'])") && \
+          curl -L \
+              -H "Accept: application/vnd.github+json" \
+              -H "Authorization: Bearer ${{ secrets.TOKEN }}" \
+              -H "X-GitHub-Api-Version: 2022-11-28" \
+              https://api.github.com/repos/khalimovv/pet-auto-api/actions/artifacts/$ARTIFACT_ID/zip \
+              -o artifacts.zip
+      - run: mkdir allure-results && unzip artifacts.zip -d allure-results
 
-      - name: Download Allure CLI
-        run: |
-          ALLURE_VERSION=2.32.0
-          wget -q https://github.com/allure-framework/allure2/releases/download/${ALLURE_VERSION}/allure-${ALLURE_VERSION}.tgz
-          sudo tar -zxf allure-${ALLURE_VERSION}.tgz -C /opt/
-          sudo ln -sf /opt/allure-${ALLURE_VERSION}/bin/allure /usr/bin/allure
-          allure --version
-
-      - name: Download allure-results from tests job
-        uses: actions/download-artifact@v4
+      - name: Store allure history
+        uses: actions/upload-artifact@v2
         with:
           name: allure-results
-          path: allure-results
 
-      - name: Check if gh-pages branch exists
-        id: gh
-        run: |
-          if git ls-remote --exit-code --heads https://github.com/${{ github.repository }} gh-pages > /dev/null; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-          fi
 
-      - name: Checkout gh-pages for history (optional)
-        if: steps.gh.outputs.exists == 'true'
-        uses: actions/checkout@v4
+  test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v3
+      - name: setup Python
+        uses: actions/setup-python@v4
         with:
-          ref: gh-pages
-          path: gh-pages
-          fetch-depth: 1
-          persist-credentials: false
+          python-version: "3.13"
+      - name: install dependencies
+        run: pip install -r requirements.txt
+      - name: first_test
+        if: "github.event.inputs.deployment_target == 'first_test'"
+        run: pytest tests/test_get_single_user.py::TestGetSingleUser::test_get_single_user --alluredir=allure-results
+      - name: second_test
+        if: "github.event.inputs.deployment_target == 'second_test'"
+        run: pytest tests/test_get_single_user.py::TestGetSingleUser::test_get_single_user --alluredir=allure-results
+      - name: Store allure results
+        uses: actions/upload-artifact@v2
+        with:
+          name: allure-results
+          path:
+            allure-results
+          retention-days: 1
 
-      - name: Reuse Allure history
-        run: |
-          if [ -d gh-pages/history ]; then
-            echo "Copying previous history..."
-            mkdir -p allure-results/history
-            cp -R gh-pages/history/* allure-results/history/ || true
-          else
-            echo "No previous history found."
-          fi
-
-      - name: Generate report to _site
-        run: |
-          rm -rf _site
-          allure generate -c allure-results -o _site
-          test -d _site && echo "Allure report generated."
-
-      - name: Upload built site artifact
-        uses: actions/upload-artifact@v4
+  generate-report:
+    runs-on: ubuntu-latest
+    needs: test
+    name: Generate report
+    steps:
+      - uses: actions/setup-java@v3
+        with:
+          distribution: 'microsoft'
+          java-version: '17'
+      - run: sudo wget https://github.com/allure-framework/allure2/releases/download/2.32.0/allure-2.32.0.tgz && sudo tar -zxvf allure-2.32.0.tgz -C /opt/ && sudo ln -s /opt/allure-2.32.0/bin/allure /usr/bin/allure
+      - name: Download all workflow artifacts
+        uses: actions/download-artifact@v3
+      - run: allure generate -c allure-results -o _site
+      - name: Store generated report
+        uses: actions/upload-artifact@v2
         with:
           name: _site
-          path: _site
-          retention-days: 7
+          path:
+            _site
+          retention-days: 1
+
+
+  publist-report:
+
+    runs-on: ubuntu-latest
+    needs: generate-report
+    name: Report publication
+    steps:
+      - name: Download all workflow artifacts
+        uses: actions/download-artifact@v3
+      - name: Upload Pages Artifact
+        uses: actions/upload-pages-artifact@v2
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v1.2.9
